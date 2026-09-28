@@ -1,0 +1,36 @@
+<launch>
+
+  <!-- MoveIt configuration for UR5 + Robotiq 2F-85 -->
+  <include file="$(find-pkg-share ur5_gripper_moveit_config)/launch/ur5_gripper_moveit.launch.py">
+    <arg name="ur_type" value="ur5"/>
+    <arg name="use_mock_hardware" value="true"/>
+    <arg name="launch_rviz" value="true"/>
+    <arg name="launch_servo" value="false"/>
+  </include>
+
+  <!-- Jazzy UR driver using simulated hardware -->
+  <include file="$(find-pkg-share ur_robot_driver)/launch/ur_control.launch.py">
+    <arg name="ur_type" value="ur5"/>
+    <arg
+      name="description_file"
+      value="$(find-pkg-share ur5_gripper_description)/urdf/ur5_robotiq85_gripper.urdf.xacro"/>
+    <arg name="robot_ip" value="127.0.0.1"/>
+    <arg name="use_mock_hardware" value="true"/>
+    <arg name="launch_rviz" value="false"/>
+    <arg name="initial_joint_controller" value="joint_trajectory_controller"/>
+  </include>
+
+  <!-- Register and start the mock Robotiq gripper controller. -->
+  <node
+    pkg="ur5_three_cube_demo"
+    exec="start_mock_gripper.sh"
+    name="start_mock_gripper"
+    output="screen"/>
+
+  <!-- Start the custom planning service after MoveIt initializes -->
+  <executable
+    cmd="bash -c 'sleep 5; exec ros2 launch moveit_ur5_interface moveit_ur5.launch.py'"
+    output="screen">
+  </executable>
+
+</launch>
